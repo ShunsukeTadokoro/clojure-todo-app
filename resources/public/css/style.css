@@ -5,3 +5,7 @@ body {
 header.top-bar {
   padding: 20px;
 }
+
+a.wide-link {
+  margin: 0 5px;
+}
