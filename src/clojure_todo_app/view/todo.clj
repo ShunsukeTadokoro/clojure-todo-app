@@ -1,7 +1,15 @@
 (ns clojure-todo-app.view.todo
   (:require [hiccup.core :as hc]
             [hiccup.form :as hf]
+            [ring.util.anti-forgery :refer [anti-forgery-field]]
             [clojure-todo-app.view.layout :as layout]))
+
+(defn error-messages [req]
+  (when-let [errors (:errors req)]
+    [:ul
+     (for [[k v] errors
+           msg v]
+       [:li.error-message msg])]))
 
 (defn todo-index-view [req todo-list]
   (->> [:section.card
@@ -19,6 +27,8 @@
         [:h2 "TODO追加"]
         (hf/form-to
           [:post "/todo/new"]
+          (anti-forgery-field)
+          (error-messages req)
           [:input {:name "title" :placeholder "タイトル"}]
           [:button.bg-blue "追加"])]
        (layout/common req)))
@@ -40,6 +50,8 @@
           [:h2 "TODO編集"]
           (hf/form-to
             [:post (str "/todo/" todo-id "/edit")]
+            (anti-forgery-field)
+            (error-messages req)
             [:input {:name :title :value (:title todo) :placeholder "TODO"}]
             [:button.bg-blue "更新"])]
          (layout/common req))))
@@ -50,6 +62,7 @@
           [:h2 "TODO削除"]
           (hf/form-to
             [:post (str "/todo/" todo-id "/delete")]
+            (anti-forgery-field)
             [:p "次のTODOを削除しますか？"]
             [:p "*" (:title todo)]
             [:button.bg-red "削除"])]

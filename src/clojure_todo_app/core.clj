@@ -1,15 +1,9 @@
 (ns clojure-todo-app.core
   (:require [compojure.core :refer [routes]]
             [ring.adapter.jetty :as server]
-            [ring.middleware.flash :as flash]
-            [ring.middleware.resource :as resource]
-            [ring.middleware.keyword-params :as keyword-params]
-            [ring.middleware.params :as params]
-            [ring.middleware.session :as session]
             [clojure-todo-app.handler.main :refer [main-routes]]
             [clojure-todo-app.handler.todo :refer [todo-routes]]
-            [clojure-todo-app.middleware :refer [wrap-dev]]
-            [environ.core :refer [env]]))
+            [clojure-todo-app.middleware :refer [middleware-set]]))
 
 (defn- wrap [handler middleware opt]
   (if (true? opt)
@@ -21,15 +15,10 @@
 (defonce server (atom nil))
 
 (def app
-  (-> (routes
-        todo-routes
-        main-routes)
-      (wrap wrap-dev (:dev env))
-      (wrap resource/wrap-resource "public")
-      (wrap keyword-params/wrap-keyword-params true)
-      (wrap params/wrap-params true)
-      (wrap flash/wrap-flash true)
-      (wrap session/wrap-session true)))
+  (middleware-set
+  (routes
+    todo-routes
+    main-routes)))
 
 (defn start-server []
   (when-not @server

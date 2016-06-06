@@ -1,4 +1,8 @@
-(ns clojure-todo-app.middleware)
+(ns clojure-todo-app.middleware
+  (:require [environ.core :refer [env]]
+            [ring.middleware.defaults :as defaults]))
+
+(def ^:private wrap #'defaults/wrap)
 
 (defn- try-resolve [sym]
   (try
@@ -16,3 +20,8 @@
           wrap-exceptions
           wrap-reload)
       (throw (RuntimeException. "Middleware requires ring/ring-devel and prone;")))))
+
+(defn middleware-set [handler]
+  (-> handler
+      (wrap wrap-dev (:dev env))
+      (defaults/wrap-defaults defaults/site-defaults)))
